@@ -90,6 +90,18 @@ import UIKit
     @objc(floatingPanel:contentOffsetForPinningScrollView:)
     optional
     func floatingPanel(_ fpc: FloatingPanelController, contentOffsetForPinning trackingScrollView: UIScrollView) -> CGPoint
+    
+    @objc optional
+    func delete()
+    
+    @objc optional
+    func down()
+    
+    @objc optional
+    func edit()
+    
+    @objc optional
+    func playVoice()
 }
 
 ///
@@ -114,7 +126,7 @@ open class FloatingPanelController: UIViewController {
     }
 
     /// The delegate of a panel controller object.
-    @objc 
+    @objc
     public weak var delegate: FloatingPanelControllerDelegate?{
         didSet{
             didUpdateDelegate()
@@ -125,6 +137,31 @@ open class FloatingPanelController: UIViewController {
     @objc
     public var surfaceView: SurfaceView! {
         return floatingPanel.surfaceView
+    }
+    
+    @objc
+    public var deleteBtn: UIButton {
+        return floatingPanel.deleteBtn
+    }
+    
+    @objc
+    public var editBtn: UIButton {
+        return floatingPanel.editBtn
+    }
+    
+    @objc
+    public var voiceBtn: UIButton {
+        return floatingPanel.voiceBtn
+    }
+    
+    @objc
+    public var downBtn: UIButton {
+        return floatingPanel.downBtn
+    }
+    
+    @objc
+    public var indicatorView: UIActivityIndicatorView {
+        return floatingPanel.indicatorView
     }
 
     /// Returns the backdrop view managed by the controller object.
@@ -193,7 +230,7 @@ open class FloatingPanelController: UIViewController {
     /// The behavior for determining the adjusted content offsets.
     ///
     /// This property specifies how the content area of the tracking scroll view is modified using ``adjustedContentInsets``. The default value of this property is FloatingPanelController.ContentInsetAdjustmentBehavior.always.
-    @objc 
+    @objc
     public var contentInsetAdjustmentBehavior: ContentInsetAdjustmentBehavior = .always
 
     /// A Boolean value that determines whether the removal interaction is enabled.
@@ -235,11 +272,17 @@ open class FloatingPanelController: UIViewController {
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setUp()
+        if #available(iOS 11.0, *) {
+            settingMyView()
+        }
     }
 
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nil, bundle: nil)
         setUp()
+        if #available(iOS 11.0, *) {
+            settingMyView()
+        }
     }
 
     /// Initialize a newly created panel controller.
@@ -289,6 +332,36 @@ open class FloatingPanelController: UIViewController {
         view.addSubview(surfaceView)
 
         self.view = view as UIView
+    }
+    
+    @available(iOS 11.0, *)
+    func settingMyView() {
+        deleteBtn.addTarget(self, action: #selector(tapDelete), for: .touchDown)
+        downBtn.addTarget(self, action: #selector(tapDown), for: .touchDown)
+        editBtn.addTarget(self, action: #selector(tapEdit), for: .touchDown)
+        voiceBtn.addTarget(self, action: #selector(tapPlayVoice), for: .touchDown)
+        
+        self.view.addSubview(downBtn)
+        self.view.addSubview(deleteBtn)
+        self.view.addSubview(voiceBtn)
+        self.view.addSubview(editBtn)
+        self.view.addSubview(indicatorView)
+    }
+    
+    @objc func tapDelete() {
+        self.delegate?.delete?()
+    }
+    
+    @objc func tapDown() {
+        self.delegate?.down?()
+    }
+    
+    @objc func tapEdit() {
+        self.delegate?.edit?()
+    }
+    
+    @objc func tapPlayVoice() {
+        self.delegate?.playVoice?()
     }
 
     open override func viewDidLayoutSubviews() {
